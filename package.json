@@ -1,0 +1,12 @@
+{
+  "name": "porter-config-action",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Threekit/porter-config-action.git",
+  "author": "Amaan Saeed <asaeed@threekit.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "yaml": "^1.10.2"
+  }
+}
