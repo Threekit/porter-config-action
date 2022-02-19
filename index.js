@@ -26,9 +26,9 @@ try {
   const projectName = core.getInput("project-name");
   const isDev = core.getInput("env") === "dev";
 
-  const config = getPorterConfig(projectName, isDev);
+  const ymlConfig = getPorterConfig(projectName, isDev);
 
-  fs.writeFileSync("./porter.yml", JSON.stringify(config));
+  fs.writeFileSync("./porter.yaml", ymlConfig);
 } catch (error) {
   core.setFailed(error.message);
 }
