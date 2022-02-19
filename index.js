@@ -24,11 +24,12 @@ function getPorterConfig(projectName, isDev) {
 try {
   // `project-name` input defined in action metadata file
   const projectName = core.getInput("project-name");
-  const isDev = core.getInput("env") === "dev";
 
-  const ymlConfig = getPorterConfig(projectName, isDev);
+  const devConfig = getPorterConfig(projectName, true);
+  const prodConfig = getPorterConfig(projectName, false);
 
-  fs.writeFileSync("./porter.yaml", ymlConfig);
+  fs.writeFileSync("./porter-dev.yaml", devConfig);
+  fs.writeFileSync("./porter-prod.yaml", prodConfig);
 } catch (error) {
   core.setFailed(error.message);
 }
