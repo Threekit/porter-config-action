@@ -1,6 +1,8 @@
 name: "Prep project porter.yml"
 description: "Preps the porter.yml with the domains for the project"
 inputs:
+  ref: # id of input
+    description: "The name of the branch triggering the action"
   repo-name: # id of input
     description: "Name of the project"
     required: true

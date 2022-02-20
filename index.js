@@ -25,7 +25,17 @@ async function run() {
     const myToken = core.getInput("token");
     const repo = core.getInput("repo-name");
     const output = core.getInput("output");
+    const ref = core.getInput("ref");
     const octokit = github.getOctokit(myToken);
+
+    if (ref?.length) {
+      if (!defaultDeployments.includes(ref) || !ref.startsWith("feat-")) {
+        const empty = JSON.stringify(JSON.stringify([]));
+        core.setOutput("branches", empty);
+        return;
+      }
+    }
+
     const { data } = await octokit.rest.repos.listBranches({
       owner: "Threekit",
       repo,
@@ -40,7 +50,6 @@ async function run() {
 
     const branchesOutput = JSON.stringify(JSON.stringify(branches));
     core.setOutput("branches", branchesOutput);
-    console.log(branchesOutput);
     if (output === "branches") return;
 
     const hosts = branches.map((el) => prepHost(repo, el));
