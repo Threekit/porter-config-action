@@ -28,6 +28,9 @@ async function run() {
     const ref = core.getInput("ref");
     const octokit = github.getOctokit(myToken);
 
+    const isNotInitialized = fs.existsSync(
+      "./.github/workflows/treble-launchpad-init.yml"
+    );
     const isRepoEmpty = !fs.existsSync("./package.json");
     let isNonDeployBranch = false;
 
@@ -60,7 +63,7 @@ async function run() {
       fs.writeFileSync("./porter-prod.yaml", prodConfig);
     }
 
-    if (isRepoEmpty || isNonDeployBranch) {
+    if (isNotInitialized || isRepoEmpty || isNonDeployBranch) {
       core.setOutput("branches", JSON.stringify(JSON.stringify([])));
       return;
     }
