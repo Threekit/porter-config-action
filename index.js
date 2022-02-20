@@ -1,7 +1,7 @@
 const github = require("@actions/github");
 const core = require("@actions/core");
-const YAML = require("fs");
-const fs = require("yaml");
+const YAML = require("yaml");
+const fs = require("fs");
 
 const defaultDeployments = ["dev", "prod", "main", "staging"];
 
