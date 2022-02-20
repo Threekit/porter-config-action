@@ -31,7 +31,7 @@ async function run() {
     console.log("ref", ref);
 
     if (ref?.length) {
-      if (!defaultDeployments.includes(ref) || !ref.startsWith("feat-")) {
+      if (!defaultDeployments.includes(ref) && !ref.startsWith("feat-")) {
         const empty = JSON.stringify(JSON.stringify([]));
         core.setOutput("branches", empty);
         return;
