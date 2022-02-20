@@ -37,11 +37,6 @@ async function run() {
       }
     }
 
-    if (isRepoEmpty || isNonDeployBranch) {
-      core.setOutput("branches", JSON.stringify(JSON.stringify([])));
-      return;
-    }
-
     const { data } = await octokit.rest.repos.listBranches({
       owner: "Threekit",
       repo,
@@ -54,16 +49,23 @@ async function run() {
       })
       .map((el) => el.name);
 
-    const branchesOutput = JSON.stringify(JSON.stringify(branches));
-    core.setOutput("branches", branchesOutput);
-    if (output === "branches") return;
-
     const hosts = branches.map((el) => prepHost(repo, el));
     const devConfig = getPorterYml(hosts);
     const prodConfig = getPorterYml([prepHost(repo)]);
 
-    fs.writeFileSync("./porter-dev.yaml", devConfig);
-    fs.writeFileSync("./porter-prod.yaml", prodConfig);
+    const branchesOutput = JSON.stringify(JSON.stringify(branches));
+
+    if (output === "config") {
+      fs.writeFileSync("./porter-dev.yaml", devConfig);
+      fs.writeFileSync("./porter-prod.yaml", prodConfig);
+    }
+
+    if (isRepoEmpty || isNonDeployBranch) {
+      core.setOutput("branches", JSON.stringify(JSON.stringify([])));
+      return;
+    }
+
+    core.setOutput("branches", branchesOutput);
   } catch (error) {
     core.setFailed(error.message);
   }
