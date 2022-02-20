@@ -30,17 +30,20 @@ async function run() {
       owner: "Threekit",
       repo,
     });
-    const branches = data.filter((el) => {
-      if (defaultDeployments.includes(el.name)) return true;
-      if (el.name.startsWith("feat-")) return true;
-      return false;
-    });
+    const branches = data
+      .filter((el) => {
+        if (defaultDeployments.includes(el.name)) return true;
+        if (el.name.startsWith("feat-")) return true;
+        return false;
+      })
+      .map((el) => el.name);
 
     const branchesOutput = JSON.stringify(JSON.stringify(branches));
     core.setOutput("branches", branchesOutput);
+    console.log(branchesOutput);
     if (output === "branches") return;
 
-    const hosts = branches.map((el) => prepHost(repo, el.name));
+    const hosts = branches.map((el) => prepHost(repo, el));
     const devConfig = getPorterYml(hosts);
     const prodConfig = getPorterYml([prepHost(repo)]);
 
