@@ -1,35 +1,49 @@
+const github = require("@actions/github");
 const core = require("@actions/core");
-// const github = require("@actions/github");
-const YAML = require("yaml");
 const fs = require("fs");
 
-function prepHosts(projectName, isDev) {
-  if (!isDev) return [`${projectName}.3kit.com`];
-  return ["main", "prod", "dev", "staging"].reduce((output, branch) => {
-    output.push(`${projectName}.${branch}.3kit.com`);
-    return output;
-  }, []);
+const defaultDeployments = ["dev", "prod", "main", "staging"];
+
+function prepHost(name, branch) {
+  if (!branch?.length) return `${name}.3kit.com`;
+  return `${name}.${branch}.3kit.com`;
 }
 
-function getPorterConfig(projectName, isDev) {
+function getPorterYml(hosts) {
   const porterConfig = {
     ingress: {
       custom_domain: true,
-      hosts: prepHosts(projectName, isDev),
+      hosts,
     },
   };
   return YAML.stringify(porterConfig);
 }
 
-try {
-  // `project-name` input defined in action metadata file
-  const projectName = core.getInput("project-name");
+async function run() {
+  try {
+    const myToken = core.getInput("token");
+    const repo = core.getInput("repo-name");
+    const octokit = github.getOctokit(myToken);
+    const { data } = await octokit.rest.repos.listBranches({
+      owner: "Threekit",
+      repo,
+    });
+    const hosts = data
+      .filter((el) => {
+        if (defaultDeployments.includes(el.name)) return true;
+        if (el.name.startsWith("feat-")) return true;
+        return false;
+      })
+      .map((el) => prepHost(repo, el.name));
 
-  const devConfig = getPorterConfig(projectName, true);
-  const prodConfig = getPorterConfig(projectName, false);
+    const devConfig = getPorterYml(hosts);
+    const prodConfig = getPorterYml([prepHost(repo)]);
 
-  fs.writeFileSync("./porter-dev.yaml", devConfig);
-  fs.writeFileSync("./porter-prod.yaml", prodConfig);
-} catch (error) {
-  core.setFailed(error.message);
+    fs.writeFileSync("./porter-dev.yaml", devConfig);
+    fs.writeFileSync("./porter-prod.yaml", prodConfig);
+  } catch (error) {
+    core.setFailed(error.message);
+  }
 }
+
+run();
