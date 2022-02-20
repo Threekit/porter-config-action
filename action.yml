@@ -7,6 +7,12 @@ inputs:
   token: # id of input
     description: "Github token"
     required: true
+  output: # id of input
+    description: "Output - branches | config"
+    default: config
+outputs:
+  branches: # id of output
+    description: "JSON array of branches"
 runs:
   using: "node16"
   main: "index.js"

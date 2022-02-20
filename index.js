@@ -23,19 +23,23 @@ async function run() {
   try {
     const myToken = core.getInput("token");
     const repo = core.getInput("repo-name");
+    const output = core.getInput("output");
     const octokit = github.getOctokit(myToken);
     const { data } = await octokit.rest.repos.listBranches({
       owner: "Threekit",
       repo,
     });
-    const hosts = data
-      .filter((el) => {
-        if (defaultDeployments.includes(el.name)) return true;
-        if (el.name.startsWith("feat-")) return true;
-        return false;
-      })
-      .map((el) => prepHost(repo, el.name));
+    const branches = data.filter((el) => {
+      if (defaultDeployments.includes(el.name)) return true;
+      if (el.name.startsWith("feat-")) return true;
+      return false;
+    });
 
+    const branchesOutput = JSON.stringify(JSON.stringify(branches));
+    core.setOutput("branches", branchesOutput);
+    if (output === "branches") return;
+
+    const hosts = branches.map((el) => prepHost(repo, el.name));
     const devConfig = getPorterYml(hosts);
     const prodConfig = getPorterYml([prepHost(repo)]);
 
