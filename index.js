@@ -28,14 +28,18 @@ async function run() {
     const ref = core.getInput("ref");
     const octokit = github.getOctokit(myToken);
 
-    console.log("ref", ref);
+    const isRepoEmpty = !fs.existsSync("./package.json");
+    let isNonDeployBranch = false;
 
     if (ref?.length) {
       if (!defaultDeployments.includes(ref) && !ref.startsWith("feat-")) {
-        const empty = JSON.stringify(JSON.stringify([]));
-        core.setOutput("branches", empty);
-        return;
+        isNonDeployBranch = true;
       }
+    }
+
+    if (isRepoEmpty || isNonDeployBranch) {
+      core.setOutput("branches", JSON.stringify(JSON.stringify([])));
+      return;
     }
 
     const { data } = await octokit.rest.repos.listBranches({
