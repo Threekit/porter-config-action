@@ -6,8 +6,10 @@ const fs = require("fs");
 const defaultDeployments = ["dev", "prod", "main", "staging"];
 
 function prepHost(name, branch) {
-  if (!branch?.length) return `${name}.3kit.com`;
-  return `${name}.${branch}.3kit.com`;
+  let prepped = name;
+  if (name.includes("--")) prepped = name.split("--")[1];
+  if (!branch?.length) return `${prepped}.3kit.com`;
+  return `${prepped}.${branch}.3kit.com`;
 }
 
 function getPorterYml(hosts) {
