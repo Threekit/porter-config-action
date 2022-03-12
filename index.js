@@ -6,10 +6,8 @@ const fs = require("fs");
 const defaultDeployments = ["dev", "prod", "main", "staging"];
 
 function prepHost(name, branch) {
-  let prepped = name;
-  if (name.includes("--")) prepped = name.split("--")[1];
-  if (!branch?.length) return `${prepped}.3kit.com`;
-  return `${prepped}.${branch}.3kit.com`;
+  if (!name?.length) return `${name}.3kit.com`;
+  return `${name}.${branch}.3kit.com`;
 }
 
 function getPorterYml(hosts) {
@@ -26,6 +24,7 @@ async function run() {
   try {
     const myToken = core.getInput("token");
     const repo = core.getInput("repo-name");
+    const projectName = repo.includes("--") ? repo.split("--")[1] : repo;
     const output = core.getInput("output");
     const ref = core.getInput("ref");
     const octokit = github.getOctokit(myToken);
@@ -54,9 +53,9 @@ async function run() {
       })
       .map((el) => el.name);
 
-    const hosts = branches.map((el) => prepHost(repo, el));
+    const hosts = branches.map((el) => prepHost(projectName, el));
     const devConfig = getPorterYml(hosts);
-    const prodConfig = getPorterYml([prepHost(repo)]);
+    const prodConfig = getPorterYml([prepHost(projectName)]);
 
     const branchesOutput = JSON.stringify(JSON.stringify(branches));
 
@@ -64,6 +63,8 @@ async function run() {
       fs.writeFileSync("./porter-dev.yaml", devConfig);
       fs.writeFileSync("./porter-prod.yaml", prodConfig);
     }
+
+    core.setOutput("project-name", projectName);
 
     if (isNotInitialized || isRepoEmpty || isNonDeployBranch) {
       core.setOutput("branches", JSON.stringify(JSON.stringify([])));
